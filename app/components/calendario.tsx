@@ -1,7 +1,85 @@
+"use client";
+
+import { useMutation, useQuery } from "@apollo/client/react";
 import Link from "next/link";
+import { GET_CALENDARIO, GET_CURSO_CALENDARIO } from "../lib/queries/data";
+import { useState } from "react";
+import Cursos from "./cursos";
 
 export default function Calendario() {
-    return(
+    const [form, setForm] = useState<any>({
+        nome: null,
+        email: null,
+        telefone :null,
+        curso: null,
+    });
+
+        const[errors, setErrors] = useState<any>({});
+        const { data:data_curso_calendario, loading:loading_curso_calendario, error:error_curso_calendario } = useQuery(GET_CURSO_CALENDARIO, {
+            fetchPolicy: 'cache-and-network',
+            nextFetchPolicy: 'cache-and-network'
+        });
+    
+
+        const [createCalendario, { data, loading, error }] = useMutation(GET_CALENDARIO);
+
+        const validate = () => { const newErrors: any = {};
+
+        if (!form.nome.trim()) {
+            newErrors.nome = "Nome é obrigatório";
+        }
+
+        if (!form.email || !form.email.trim()) {
+            newErrors.email = "Email é obrigatório";
+        } else if (!/\S+@\S+\.\S+/.test(form.email)) {
+            newErrors.email = "Email inválido";
+        }
+
+        if (!form.telefone || !form.telefone.trim()) {
+            newErrors.telefone = "Telefone é obrigatório";
+        }
+
+        if (!form.curso) {
+            newErrors.curso = "Selecione um curso";
+        }
+
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
+        };
+
+        console.log(data, "dataapi");
+        const calendarioData: any = data_curso_calendario
+        console.log(calendarioData, "dataap");
+        const calendario: any[] = calendarioData?.cursocalendarios;
+
+        const handleSubmit = async (e: any) => {
+            e.preventDefault();
+            if (!validate()) return;
+            try {
+                const { data: result } = await createCalendario({
+                    variables: { data:form }
+                });
+                // result.createCalendario contains the returned item
+                console.log('Saved:', result);
+
+                setForm({
+                nome: "",
+                email: "",
+                telefone: "",
+                curso: "",
+            });
+
+            setErrors({});
+            } catch (err) {
+                console.error('Mutation error', err);
+            }
+
+        };
+
+    if(loading_curso_calendario) return null; 
+    if (error) return <p>Erro ao carregar</p>;
+
+    return (
         <section id="calendario">
             <div className="cal-header reveal">
                 <div className="section-tag">Próximas Turmas</div>
@@ -45,33 +123,59 @@ export default function Calendario() {
                     </div>-->*/}
                 </div>
 
-            <div className="form-card reveal">
-                <h3>Reservar Minha Vaga</h3>
-                <p>Preencha o formulário e entraremos em contacto em menos de 24 horas.</p>
-                <div className="form-group">
-                    <label>Nome Completo</label>
-                    <input type="text" placeholder="O seu nome"/>
-                </div>
-                <div className="form-group">
-                    <label>Email</label>
-                    <input type="email" placeholder="email@exemplo.com"/>
-                </div>
-                <div className="form-group">
-                    <label>Telemóvel / WhatsApp</label>
-                    <input type="tel" placeholder="+238 000 0000"/>
-                </div>
-                <div className="form-group">
-                    <label>Curso de Interesse</label>
-                    <select>
-                    <option value="">Selecione o curso...</option>
-                    <option>Básico – Primeiros Socorros (20h)</option>
-                    <option>Avançado – Atendimento Pré-Hospitalar (40h)</option>
-                    <option>Especializado – APH Profissional (60h)</option>
-                    <option>Formação In-Company / Empresas</option>
-                    </select>
-                </div>
-                <button className="btn-submit">Quero Reservar Minha Vaga →</button>
-                </div>
+                <form className="form-card reveal" onSubmit={handleSubmit}>
+                    <h3>Reservar Minha Vaga</h3>
+                    <p>Preencha o formulário e entraremos em contacto em menos de 24 horas.</p>
+                    <div className="form-group">
+                        <label>Nome Completo</label>
+                        <input type="text" placeholder="O seu nome" value={form.nome??""}
+                            onChange={(e) => setForm({ ...form, nome: e.target.value })
+                            } />
+                            {errors.nome && <span className="error">{errors.nome}</span>}
+                    </div>
+
+                    <div className="form-group">
+                        <label>Email</label>
+                        <input type="email" placeholder="email@exemplo.com" value={form.email??""}
+                            onChange={(e) => setForm({ ...form, email: e.target.value })} />
+                            {errors.email && <span className="error">{errors.email}</span>}
+                    </div>
+
+                    <div className="form-group">
+                        <label>Telemóvel / WhatsApp</label>
+                        <input type="tel" placeholder="+238 000 0000" value={form.telefone??""}
+                            onChange={(e) => setForm({ ...form, telefone: e.target.value })} />
+                            {errors.telefone && <span className="error">{errors.telefone}</span>}
+                    </div>
+
+                    <div className="form-group">
+                        <label>Curso de Interesse</label>
+
+                        <select
+                            value={form.curso??""}
+                            onChange={(e) =>
+                            setForm({ ...form, curso: e.target.value })
+                            }
+                        >
+                            <option value="">Selecione o curso...</option>
+
+                            {calendario?.map((item: any) => {
+                            const curso = item.attributes;
+
+                            return (
+                                <option
+                                key={item.documentId}
+                                value={item?.nome}
+                                >
+                                    {item?.nome}
+                                </option>
+                            );
+                            })}
+                        </select>
+                        {errors.curso && <span className="error">{errors.curso}</span>}
+                    </div>
+                    <button type="submit"  className="btn-submit">Quero Reservar Minha Vaga →</button>
+                </form>
             </div>
         </section>
     );

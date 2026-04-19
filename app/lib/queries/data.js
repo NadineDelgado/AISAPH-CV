@@ -11,6 +11,7 @@ export const GET_CURSOS = gql`
     nivel
     num
     publico
+    documentId
   }
 }
 `;
@@ -44,6 +45,26 @@ query Porques {
     icone
     descricao
     cargo
+  }
+}
+`;
+
+export const GET_CALENDARIO = gql`
+mutation CreateCalendario($data: CalendarioInput!) {
+  createCalendario(data: $data) {
+    curso
+    email
+    nome
+    telefone
+  }
+}
+`;
+
+export const GET_CURSO_CALENDARIO = gql`
+query Cursocalendarios {
+  cursocalendarios {
+    nome
+    documentId
   }
 }
 `;

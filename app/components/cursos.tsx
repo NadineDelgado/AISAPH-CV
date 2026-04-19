@@ -35,7 +35,7 @@ export default function Cursos() {
             <div className="cursos-grid">
                 {cursos?.map((curso: any) => {
                     return (
-                        <div key={curso.num} className="curso-card reveal">
+                        <div key={curso.documentId} className="curso-card reveal">
                             <div className="curso-num">{String(curso?.num).padStart(2, "0")}</div>
                             <div className="curso-icon">{curso?.icone}</div>
                             <div className="curso-level">{curso?.nivel}</div>
