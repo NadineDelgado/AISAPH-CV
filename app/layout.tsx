@@ -1,7 +1,10 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { Oswald, Source_Sans_3 } from "next/font/google";
+import { Oswald, Source_Sans_3, Geist } from "next/font/google";
 import {ApolloWrapper} from "./lib/apollo-provider";
+import { cn } from "@/lib/utils";
+
+const geist = Geist({subsets:['latin'],variable:'--font-sans'});
 
 const oswald = Oswald({
   subsets: ["latin"],
@@ -26,7 +29,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="pt">
+    <html lang="pt" className={cn("font-sans", geist.variable)}>
       <body className={`${oswald.variable} ${sourceSans.variable}`}>
        <ApolloWrapper>
 

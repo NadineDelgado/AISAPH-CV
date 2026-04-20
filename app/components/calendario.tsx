@@ -14,16 +14,16 @@ export default function Calendario() {
         curso: null,
     });
 
-        const[errors, setErrors] = useState<any>({});
-        const { data:data_curso_calendario, loading:loading_curso_calendario, error:error_curso_calendario } = useQuery(GET_CURSO_CALENDARIO, {
-            fetchPolicy: 'cache-and-network',
-            nextFetchPolicy: 'cache-and-network'
-        });
+    const[errors, setErrors] = useState<any>({});
+    const { data:data_curso_calendario, loading:loading_curso_calendario, error:error_curso_calendario } = useQuery(GET_CURSO_CALENDARIO, {
+        fetchPolicy: 'cache-and-network',
+        nextFetchPolicy: 'cache-and-network'
+    });
     
 
-        const [createCalendario, { data, loading, error }] = useMutation(GET_CALENDARIO);
+    const [createCalendario, { data, loading, error }] = useMutation(GET_CALENDARIO);
 
-        const validate = () => { const newErrors: any = {};
+    const validate = () => { const newErrors: any = {};
 
         if (!form.nome.trim()) {
             newErrors.nome = "Nome é obrigatório";
@@ -45,24 +45,30 @@ export default function Calendario() {
 
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
-        };
+    };
 
-        console.log(data, "dataapi");
-        const calendarioData: any = data_curso_calendario
-        console.log(calendarioData, "dataap");
-        const calendario: any[] = calendarioData?.cursocalendarios;
+    console.log(data, "dataapi");
+    const calendarioData: any = data_curso_calendario
+    console.log(calendarioData, "dataap");
+    const calendario: any[] = calendarioData?.cursocalendarios;
+    const[showModal, setShowModal] = useState(false);
+    /*const[sucess, setSuccess] = useState(false);*/
 
-        const handleSubmit = async (e: any) => {
-            e.preventDefault();
-            if (!validate()) return;
-            try {
-                const { data: result } = await createCalendario({
-                    variables: { data:form }
-                });
-                // result.createCalendario contains the returned item
-                console.log('Saved:', result);
+    const handleSubmit = async (e: any) => {
+        e.preventDefault();
+        if (!validate()) return;
+        try {
+            const { data: result } = await createCalendario({
+                variables: { data:form }
+            });
+                
+            console.log('Saved:', result);
 
-                setForm({
+            /*setSuccess(true);*/
+
+            setShowModal(true);
+
+            setForm({
                 nome: "",
                 email: "",
                 telefone: "",
@@ -70,11 +76,10 @@ export default function Calendario() {
             });
 
             setErrors({});
-            } catch (err) {
-                console.error('Mutation error', err);
-            }
-
-        };
+        } catch (err) {
+            console.error('Mutation error', err);
+        }
+    };
 
     if(loading_curso_calendario) return null; 
     if (error) return <p>Erro ao carregar</p>;
@@ -121,7 +126,16 @@ export default function Calendario() {
                         </div>
                         <span class="turma-tag">Em Breve</span>
                     </div>-->*/}
-                </div>
+            </div>
+
+                {showModal && (
+                    <div className="showmodal-box">
+                        <div className="showmodal">
+                            <h3>Reserva enviada com sucesso!</h3>
+                            <button className="btn-ok" onClick={() => setShowModal(!showModal)}>OK</button>
+                        </div>
+                    </div>
+                )}
 
                 <form className="form-card reveal" onSubmit={handleSubmit}>
                     <h3>Reservar Minha Vaga</h3>
@@ -175,6 +189,8 @@ export default function Calendario() {
                         {errors.curso && <span className="error">{errors.curso}</span>}
                     </div>
                     <button type="submit"  className="btn-submit">Quero Reservar Minha Vaga →</button>
+
+                    
                 </form>
             </div>
         </section>
